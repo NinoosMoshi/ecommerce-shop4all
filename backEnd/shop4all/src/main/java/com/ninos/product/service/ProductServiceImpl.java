@@ -5,6 +5,8 @@ import com.ninos.cart_item.entity.CartItem;
 import com.ninos.cart_item.repository.CartItemRepository;
 import com.ninos.category.entity.Category;
 import com.ninos.category.repository.CategoryRepository;
+import com.ninos.image.dtos.ImageDTO;
+import com.ninos.image.entity.Image;
 import com.ninos.image.repository.ImageRepository;
 import com.ninos.order_item.entity.OrderItem;
 import com.ninos.order_item.repository.OrderItemRepository;
@@ -59,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
         Product savedProduct = productRepository.save(product);
 
         // Map the saved product back to ProductDTO
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        return convertSingleProductToDto(savedProduct);
     }
 
     @Override
@@ -83,19 +85,21 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setCategory(category);
 
         // Save the updated product
-        Product updatedProduct = productRepository.save(existingProduct);
+        Product savedProduct = productRepository.save(existingProduct);
 
         // Convert back to DTO and return
-        return modelMapper.map(updatedProduct, ProductDTO.class);
+        return convertSingleProductToDto(savedProduct);
     }
 
     @Override
     public ProductDTO getProductById(Long productId) {
 
-        Product product = productRepository.findById(productId)
+        Product savedProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-        return modelMapper.map(product, ProductDTO.class);
+        return convertSingleProductToDto(savedProduct);
     }
+
+
 
     @Override
     public void deleteProductById(Long productId) {
@@ -127,5 +131,63 @@ public class ProductServiceImpl implements ProductService {
         // Delete product
         productRepository.deleteById(product.getId());
     }
+
+    @Override
+    public List<ProductDTO> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return convertProductToDto(products);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByCategoryAndBrand(String category, String brand) {
+        List<Product> products = productRepository.findProductsByCategoryNameAndBrand(category, brand);
+        return convertProductToDto(products);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByCategory(String category) {
+        List<Product> products = productRepository.findProductsByCategoryName(category);
+        return convertProductToDto(products);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByBrandAndName(String brand, String name) {
+        List<Product> products = productRepository.findProductsByBrandAndName(brand,name);
+        return convertProductToDto(products);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByBrand(String brand) {
+        List<Product> products = productRepository.findProductsByBrand(brand);
+        return convertProductToDto(products);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByName(String name) {
+        List<Product> products = productRepository.findProductsByName(name);
+        return convertProductToDto(products);
+    }
+
+
+    private ProductDTO convertSingleProductToDto(Product savedProduct) {
+        ProductDTO productDTO = modelMapper.map(savedProduct, ProductDTO.class);
+        List<Image> images = imageRepository.findImagesByProductId(savedProduct.getId());
+        List<ImageDTO> imageDTOS = images.stream()
+                .map(image -> modelMapper.map(image, ImageDTO.class))
+                .toList();
+
+        productDTO.setImages(imageDTOS);
+        return productDTO;
+    }
+
+
+    private List<ProductDTO> convertProductToDto(List<Product> products) {
+        return products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
+                .toList();
+    }
+
+
+
+
 
 }
