@@ -182,8 +182,10 @@ public class ProductServiceImpl implements ProductService {
 
 
     private List<ProductDTO> convertProductToDto(List<Product> products) {
+        // return modelMapper.map(products, new TypeToken<List<ProductDTO>>() {}.getType());
         return products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
-                .toList();
+                .toList(); // this way is better
+
     }
 
 
