@@ -3,10 +3,8 @@ package com.ninos.image.service;
 import com.ninos.image.dtos.ImageDTO;
 import com.ninos.image.entity.Image;
 import com.ninos.image.repository.ImageRepository;
-import com.ninos.product.dtos.ProductDTO;
 import com.ninos.product.entity.Product;
 import com.ninos.product.repository.ProductRepository;
-import com.ninos.product.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,10 +27,9 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
-    public ImageDTO getImageById(Long imageId) {
-        Image image = imageRepository.findById(imageId)
+    public Image getImageById(Long imageId) {
+        return imageRepository.findById(imageId)
                 .orElseThrow(() -> new EntityNotFoundException("Image with id " + imageId + " not found!"));
-        return modelMapper.map(image, ImageDTO.class);
     }
 
     @Override
