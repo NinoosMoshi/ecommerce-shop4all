@@ -4,6 +4,7 @@ import com.ninos.category.dtos.CategoryDTO;
 import com.ninos.category.entity.Category;
 import com.ninos.category.exception.ResourceAlreadyExistsException;
 import com.ninos.category.repository.CategoryRepository;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,11 +23,11 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO addCategory(CategoryDTO categoryDTO) {
         boolean existsByName = categoryRepository.existsByName(categoryDTO.getName());
         if (existsByName) {
-            throw new ResourceAlreadyExistsException("Category '" + categoryDTO.getName() + "' already exists!");
+            throw new EntityExistsException("Category '" + categoryDTO.getName() + "' already exists!");
         }
         Category category = modelMapper.map(categoryDTO, Category.class);
         Category savedCategory = categoryRepository.save(category);
-        return modelMapper.map(savedCategory, CategoryDTO.class);
+        return convertCategoryToDTO(savedCategory);
     }
 
 
@@ -38,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.setName(categoryDTO.getName());
 
         Category savedCategory = categoryRepository.save(existingCategory);
-        return modelMapper.map(savedCategory, CategoryDTO.class);
+        return convertCategoryToDTO(savedCategory);
     }
 
 
@@ -58,15 +59,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO findCategoryByName(String name) {
-        Category category = categoryRepository.findByName(name);
-        return modelMapper.map(category, CategoryDTO.class);
+        Category savedCategory = categoryRepository.findByName(name);
+        return convertCategoryToDTO(savedCategory);
     }
 
     @Override
     public CategoryDTO findCategoryById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
+        Category savedCategory = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category with id " + categoryId + " not found!"));
-        return modelMapper.map(category, CategoryDTO.class);
+        return convertCategoryToDTO(savedCategory);
+    }
+
+
+    private CategoryDTO convertCategoryToDTO(Category savedCategory) {
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
 

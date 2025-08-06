@@ -30,13 +30,8 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse> uploadImage(@RequestParam("file") List<MultipartFile> file,
                                                    @RequestParam("productId") Long productId) {
-        try {
             List<ImageDTO> imageDTOS = imageService.saveImages(productId, file);
             return ResponseEntity.ok(new ApiResponse("Images uploaded successfully", imageDTOS));
-
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error uploading images", e.getMessage()));
-        }
     }
 
     // "/api/v1/images/image/download/"
@@ -54,23 +49,14 @@ public class ImageController {
     public ResponseEntity<ApiResponse> updateImage(@RequestParam MultipartFile file,
                                                    @PathVariable Long imageId){
 
-        try {
             imageService.updateImage(file, imageId);
             return ResponseEntity.ok(new ApiResponse("Image updated successfully", null));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
-
     }
 
     @DeleteMapping("/image/{imageId}/delete")
     public ResponseEntity<ApiResponse> deleteImage(@PathVariable Long imageId){
-        try {
             imageService.deleteImageById(imageId);
             return ResponseEntity.ok(new ApiResponse("Image deleted successfully", null));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
     }
 
 
