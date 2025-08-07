@@ -28,12 +28,19 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(savedUser, UserDTO.class);
     }
 
+
     @Override
     public UserDTO updateUser(UserDTO userDTO, Long userId) {
         User existUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
-        existUser.setFirstName(userDTO.getFirstName());
-        existUser.setLastName(userDTO.getLastName());
+
+        if (userDTO.getFirstName() != null) {
+            existUser.setFirstName(userDTO.getFirstName());
+        }
+        if (userDTO.getLastName() != null) {
+            existUser.setLastName(userDTO.getLastName());
+        }
+
         User savedUser = userRepository.save(existUser);
         return modelMapper.map(savedUser, UserDTO.class);
     }
