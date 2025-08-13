@@ -1,11 +1,13 @@
 package com.ninos.order.dtos;
 
 import com.ninos.order_item.dtos.OrderItemDTO;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Data
 public class OrderDTO {
     private Long id;
     private Long userId;

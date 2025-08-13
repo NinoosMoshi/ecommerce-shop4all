@@ -8,6 +8,7 @@ import com.ninos.cart_item.entity.CartItem;
 import com.ninos.cart_item.repository.CartItemRepository;
 import com.ninos.product.dtos.ProductDTO;
 import com.ninos.product.entity.Product;
+import com.ninos.product.repository.ProductRepository;
 import com.ninos.product.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,58 +23,86 @@ import java.math.BigDecimal;
 public class CartItemServiceImpl implements CartItemService {
 
     private final CartItemRepository cartItemRepository;
+    private final CartService cartService;
     private final ProductService productService;
     private final CartRepository cartRepository;
-    private final ModelMapper modelMapper;
+    private final ProductRepository productRepository;
 
 
-    @Transactional
     @Override
     public void addItemToCart(Long cartId, Long productId, int quantity) {
-
-        // Validate quantity
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero.");
-        }
-
+//        Cart cart = cartService.getCartById(cartId);
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found."));
-        ProductDTO productDTO = productService.getProductById(productId);
+                .orElseThrow(() -> new EntityNotFoundException("Cart with id: " + cartId + " not found!"));
 
-        Product product = modelMapper.map(productDTO, Product.class);
+//        Product product = productService.getProductById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        CartItem cartItem = null;
 
-        // Look for existing cart item manually (no stream)
-        for (CartItem item : cart.getItems()) {
-            if (item.getProduct().getId().equals(productId)) {
-                cartItem = item;
-                break;
-            }
-        }
-
-        // If not found, create new CartItem
-        if (cartItem == null) {
-            cartItem = new CartItem();
+        CartItem cartItem = cart.getItems()
+                .stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst().orElse(new CartItem());
+        if (cartItem.getId() == null) {
             cartItem.setCart(cart);
             cartItem.setProduct(product);
-            cartItem.setUnitPrice(product.getPrice());
             cartItem.setQuantity(quantity);
+            cartItem.setUnitPrice(product.getPrice());
         } else {
-            // If found, increase the quantity
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
         }
-
-        // Update total price
         cartItem.setTotalPrice();
-
-        // Add to cart (optional depending on cart logic)
         cart.addItem(cartItem);
-
-        // Save both entities
         cartItemRepository.save(cartItem);
         cartRepository.save(cart);
     }
+//    @Override
+//    public void addItemToCart(Long cartId, Long productId, int quantity) {
+//
+//        // Validate quantity
+//        if (quantity <= 0) {
+//            throw new IllegalArgumentException("Quantity must be greater than zero.");
+//        }
+//
+//        Cart cart = cartRepository.findById(cartId)
+//                .orElseThrow(() -> new IllegalArgumentException("Cart not found."));
+//        ProductDTO productDTO = productService.getProductById(productId);
+//
+//        Product product = modelMapper.map(productDTO, Product.class);
+//
+//        CartItem cartItem = null;
+//
+//        // Look for existing cart item manually (no stream)
+//        for (CartItem item : cart.getItems()) {
+//            if (item.getProduct().getId().equals(productId)) {
+//                cartItem = item;
+//                break;
+//            }
+//        }
+//
+//        // If not found, create new CartItem
+//        if (cartItem == null) {
+//            cartItem = new CartItem();
+//            cartItem.setCart(cart);
+//            cartItem.setProduct(product);
+//            cartItem.setUnitPrice(product.getPrice());
+//            cartItem.setQuantity(quantity);
+//        } else {
+//            // If found, increase the quantity
+//            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+//        }
+//
+//        // Update total price
+//        cartItem.setTotalPrice();
+//
+//        // Add to cart (optional depending on cart logic)
+//        cart.addItem(cartItem);
+//
+//        // Save both entities
+//        cartItemRepository.save(cartItem);
+//        cartRepository.save(cart);
+//    }
 
     @Override
     public void removeItemFromCart(Long cartId, Long productId) {

@@ -36,10 +36,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<CartItem> cartItems = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<OrderItem> orderItems = new HashSet<>();
 
 
@@ -51,5 +51,4 @@ public class Product {
         this.description = description;
         this.category = category;
     }
-
 }

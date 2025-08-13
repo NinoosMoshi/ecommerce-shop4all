@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/cartItems")
+@RequestMapping("/cartItems")
 @RequiredArgsConstructor
 public class CartItemController {
 
@@ -22,14 +22,16 @@ public class CartItemController {
     private final CartService cartService;
 
     @PostMapping("/item/add")
-    public ResponseEntity<ApiResponse> addItemToCart( Long cartId,
+    public ResponseEntity<ApiResponse> addItemToCart(
+                                                      //            Long cartId,
                                                       @RequestParam Long productId,
                                                       @RequestParam int quantity) {
 
-        UserDTO user = userService.getUserById(cartId);
+        UserDTO user = userService.getUserById(2L);
         CartDTO cart = cartService.initializeNewCartForUser(user);
-        cartItemService.addItemToCart(cartId, productId, quantity);
+        cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
         return ResponseEntity.ok(new ApiResponse("Item added successfully!", null));
+
     }
 
 
